@@ -219,13 +219,18 @@ async function main(
         }
 
         if (doc) {
+          // Add file header for all files
+          if (fileCount > 1) doc.addPage();
+          doc
+            .font("Courier")
+            .fontSize(10)
+            .fillColor("#666666")
+            .text(`// ${fileName}`, { lineGap: 4 })
+            .fillColor("black");
+
           if (isBinaryFileSync(filePath)) {
             const data = fs.readFileSync(filePath).toString("base64");
-            if (fileCount > 1) doc.addPage();
-            doc
-              .font("Courier")
-              .fontSize(10)
-              .text(`${fileName}\n\nBASE64:\n\n${data}`, { lineGap: 4 });
+            doc.text(`\nBASE64:\n\n${data}`, { lineGap: 4 });
           } else {
             let data = await fsPromises.readFile(filePath, "utf8");
             // Determine parser and format with Prettier if supported

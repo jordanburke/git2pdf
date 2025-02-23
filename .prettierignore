@@ -1,0 +1,4 @@
+node_modules
+.DS_Store
+src/cq-db
+src/core/config/types.ts
