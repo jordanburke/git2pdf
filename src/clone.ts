@@ -199,7 +199,7 @@ async function main(
             .font("Courier")
             .fontSize(10)
             .fillColor("#666666")
-            .text(`// ${fileName}`, { lineGap: 4 })
+            .text(`// File: ${fileName}`, { lineGap: 4 })
             .fillColor("black")
 
           if (isBinaryFileSync(filePath)) {

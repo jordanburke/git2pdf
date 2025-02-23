@@ -11,8 +11,7 @@ export default async function loadIgnoreConfig(rootDir: string): Promise<IgnoreC
 
   try {
     const data = await fs.promises.readFile(ignoreConfigPath, "utf8")
-    const config = JSON.parse(data) as IgnoreConfig
-    return config
+    return JSON.parse(data) as IgnoreConfig
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === "ENOENT") {
       return null

@@ -5,9 +5,6 @@ import type chalkType from "chalk"
 //@ts-ignore
 import type inquirerType from "inquirer"
 
-let chalk: typeof chalkType
-let inquirer: typeof inquirerType
-
 type QuestionType = {
   type?: string
   name: string
@@ -103,14 +100,14 @@ export async function configQuestions(main: Function, chalk: typeof chalkType, i
 
   console.log(
     chalk.cyanBright(`
-  ██████╗ ███████╗██████╗  ██████╗         ██████╗         ██████╗ ██████╗ ███████╗
-  ██╔══██╗██╔════╝██╔══██╗██╔═══██╗        ╚════██╗        ██╔══██╗██╔══██╗██╔════╝
-  ██████╔╝█████╗  ██████╔╝██║   ██║         █████╔╝        ██████╔╝██║  ██║█████╗
-  ██╔══██╗██╔══╝  ██╔═══╝ ██║   ██║        ██╔═══╝         ██╔═══╝ ██║  ██║██╔══╝
-  ██║  ██║███████╗██║     ╚██████╔╝        ███████╗        ██║     ██████╔╝██║
-  ╚═╝  ╚═╝╚══════╝╚═╝      ╚═════╝         ╚══════╝        ╚═╝     ╚═════╝ ╚═╝
-
-  Welcome to Repo-to-PDF! Let's get started...
+ ██████╗ ██╗████████╗    ██████╗     ██████╗ ██████╗ ███████╗
+██╔════╝ ██║╚══██╔══╝    ╚════██╗    ██╔══██╗██╔══██╗██╔════╝
+██║  ███╗██║   ██║        █████╔╝    ██████╔╝██║  ██║█████╗  
+██║   ██║██║   ██║       ██╔═══╝     ██╔═══╝ ██║  ██║██╔══╝  
+╚██████╔╝██║   ██║       ███████╗    ██║     ██████╔╝██║     
+ ╚═════╝ ╚═╝   ╚═╝       ╚══════╝    ╚═╝     ╚═════╝ ╚═╝
+ 
+  Welcome to git2pdf!...
   `),
   )
 

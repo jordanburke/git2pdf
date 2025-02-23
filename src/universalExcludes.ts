@@ -3,6 +3,7 @@ const universalExcludedNames = [
   ".gitmodules",
   "package-lock.json",
   "yarn.lock",
+  "pnpm-lock.yaml",
   ".git",
   "repo2pdf.ignore",
   ".vscode",
