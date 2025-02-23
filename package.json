@@ -1,10 +1,10 @@
 {
-  "name": "repo-to-pdf",
-  "version": "2.2.5",
+  "name": "git2pdf",
+  "version": "2.2.4",
   "description": "A CLI tool for generating a PDF document from a GitHub repository",
   "main": "dist/clone.js",
   "bin": {
-    "repo2pdf": "dist/clone.js"
+    "git2pdf": "dist/clone.js"
   },
   "scripts": {
     "start": "node dist/clone.js",
