@@ -1,10 +1,7 @@
-import { decode } from "html-entities";
+import { decode } from "html-entities"
 
-export function htmlToJson(
-  htmlCode: string,
-  removeEmptyLines: boolean,
-): { text: string; color?: string }[] {
-  const data: { text: string; color?: string }[] = [];
+export function htmlToJson(htmlCode: string, removeEmptyLines: boolean): { text: string; color?: string }[] {
+  const data: { text: string; color?: string }[] = []
   const colorMap = new Map<string, string>([
     ["comment", "#708090"], // SlateGray
     ["punctuation", "#2F4F4F"], // DarkSlateGray
@@ -38,41 +35,40 @@ export function htmlToJson(
     ["built_in", "#ADFF2F"], // GreenYellow
     ["bullet", "#7CFC00"], // LawnGreen
     ["code", "#7F8C8D"], // Gray
-  ]);
+  ])
 
-  const elementRegex =
-    /<span\s+class="hljs-([^"]+)"[^>]*>([^<]*)(?:<\/span>)?/g;
-  const nonelementRegex = /[^<]+|<\/span>|\n/g;
+  const elementRegex = /<span\s+class="hljs-([^"]+)"[^>]*>([^<]*)(?:<\/span>)?/g
+  const nonelementRegex = /[^<]+|<\/span>|\n/g
 
-  let match;
+  let match
   while ((match = elementRegex.exec(htmlCode)) !== null) {
-    const [_, cls, text] = match;
-    const color = colorMap.get(cls.split(" ")[0].toLowerCase()) || "black";
-    data.push({ text: decode(text), color });
+    const [_, cls, text] = match
+    const color = colorMap.get(cls.split(" ")[0].toLowerCase()) || "black"
+    data.push({ text: decode(text), color })
   }
 
-  htmlCode = htmlCode.replace(elementRegex, "");
+  htmlCode = htmlCode.replace(elementRegex, "")
 
   while ((match = nonelementRegex.exec(htmlCode)) !== null) {
-    const text = match[0];
-    data.push({ text: text === "\n" ? text : decode(text) });
+    const text = match[0]
+    data.push({ text: text === "\n" ? text : decode(text) })
   }
 
-  const fixedData: { text: string; color?: string }[] = [];
+  const fixedData: { text: string; color?: string }[] = []
   for (const { text, color } of data) {
-    const lines = text.split("\n");
+    const lines = text.split("\n")
     for (let j = 0; j < lines.length; j++) {
-      const line = lines[j];
+      const line = lines[j]
 
       // Conditionally skip lines that only contain whitespace
       if (removeEmptyLines && line.trim() === "") {
-        continue;
+        continue
       }
 
-      if (j > 0) fixedData.push({ text: "\n" });
-      fixedData.push({ text: line, color });
+      if (j > 0) fixedData.push({ text: "\n" })
+      fixedData.push({ text: line, color })
     }
   }
 
-  return fixedData;
+  return fixedData
 }

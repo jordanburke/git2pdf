@@ -9,7 +9,7 @@ const universalExcludedNames = [
   ".idea",
   ".vs",
   "node_modules",
-];
+]
 
 const universalExcludedExtensions = [
   ".png",
@@ -26,6 +26,6 @@ const universalExcludedExtensions = [
   ".avi",
   ".wmv",
   ".pdf",
-];
+]
 
-export { universalExcludedNames, universalExcludedExtensions };
+export { universalExcludedNames, universalExcludedExtensions }

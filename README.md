@@ -145,7 +145,7 @@ npm install [package-name]
 
 ```typescript
 // Example: Changing font size in syntax.ts
-doc.fontSize(12);
+doc.fontSize(12)
 ```
 
 </details>

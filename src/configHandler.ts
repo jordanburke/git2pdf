@@ -1,29 +1,25 @@
-import fs from "fs";
+import fs from "fs"
 
 //@ts-ignore
-import type chalkType from "chalk";
+import type chalkType from "chalk"
 //@ts-ignore
-import type inquirerType from "inquirer";
+import type inquirerType from "inquirer"
 
-let chalk: typeof chalkType;
-let inquirer: typeof inquirerType;
+let chalk: typeof chalkType
+let inquirer: typeof inquirerType
 
 type QuestionType = {
-  type?: string;
-  name: string;
-  message: string;
-  validate?: (value: string) => boolean | string;
-  filter?: (value: string) => boolean | string | string[];
-  choices?: string[];
-  default?: string | string[];
-  when?: (answers: any) => boolean;
-};
+  type?: string
+  name: string
+  message: string
+  validate?: (value: string) => boolean | string
+  filter?: (value: string) => boolean | string | string[]
+  choices?: string[]
+  default?: string | string[]
+  when?: (answers: any) => boolean
+}
 
-export async function configQuestions(
-  main: Function,
-  chalk: typeof chalkType,
-  inquirer: typeof inquirerType,
-) {
+export async function configQuestions(main: Function, chalk: typeof chalkType, inquirer: typeof inquirerType) {
   const questions: QuestionType[] = [
     {
       type: "list",
@@ -31,20 +27,20 @@ export async function configQuestions(
       message: "Do you want to use a local repository?",
       choices: ["No", "Yes"],
       filter: function (val: string) {
-        return val.toLowerCase() === "yes";
+        return val.toLowerCase() === "yes"
       },
     },
     {
       name: "localRepoPath",
       message: "Please provide the full path to the local repository:",
       when(answers: { localRepo: boolean }) {
-        return answers.localRepo;
+        return answers.localRepo
       },
       validate: function (value: string) {
         if (fs.existsSync(value)) {
-          return true;
+          return true
         } else {
-          return "Please enter a valid directory path.";
+          return "Please enter a valid directory path."
         }
       },
     },
@@ -52,16 +48,14 @@ export async function configQuestions(
       name: "repoUrl",
       message: "Please provide a GitHub repository URL:",
       when(answers: { localRepo: boolean }) {
-        return !answers.localRepo;
+        return !answers.localRepo
       },
       validate: function (value: string) {
-        var pass = value.match(
-          /^https:\/\/github.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/,
-        );
+        var pass = value.match(/^https:\/\/github.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/)
         if (pass) {
-          return true;
+          return true
         }
-        return "Please enter a valid GitHub repository URL.";
+        return "Please enter a valid GitHub repository URL."
       },
     },
     {
@@ -82,7 +76,7 @@ export async function configQuestions(
       message: "Please provide an output file name:",
       default: "output.pdf",
       when(answers: { features: string[] }) {
-        return !answers.features.includes("One PDF per file");
+        return !answers.features.includes("One PDF per file")
       },
     },
     {
@@ -90,7 +84,7 @@ export async function configQuestions(
       message: "Please provide an output folder name:",
       default: "./output",
       when(answers: { features: string[] }) {
-        return answers.features.includes("One PDF per file");
+        return answers.features.includes("One PDF per file")
       },
     },
     {
@@ -99,13 +93,13 @@ export async function configQuestions(
       message: "Do you want to keep the cloned repository?",
       choices: ["No", "Yes"],
       when(answers: { localRepo: boolean }) {
-        return !answers.localRepo;
+        return !answers.localRepo
       },
       filter: function (val: string) {
-        return val.toLowerCase() === "yes";
+        return val.toLowerCase() === "yes"
       },
     },
-  ];
+  ]
 
   console.log(
     chalk.cyanBright(`
@@ -118,20 +112,12 @@ export async function configQuestions(
 
   Welcome to Repo-to-PDF! Let's get started...
   `),
-  );
+  )
 
-  const answers = await inquirer.prompt(questions);
-  console.log(chalk.cyanBright("\nProcessing your request...\n"));
+  const answers = await inquirer.prompt(questions)
+  console.log(chalk.cyanBright("\nProcessing your request...\n"))
 
-  const {
-    localRepo,
-    localRepoPath,
-    repoUrl,
-    features,
-    outputFileName,
-    outputFolderName,
-    keepRepo,
-  } = answers;
+  const { localRepo, localRepoPath, repoUrl, features, outputFileName, outputFolderName, keepRepo } = answers
 
   main(
     localRepo ? localRepoPath : repoUrl,
@@ -145,5 +131,5 @@ export async function configQuestions(
     outputFileName,
     outputFolderName,
     keepRepo,
-  );
+  )
 }
