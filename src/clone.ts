@@ -55,32 +55,62 @@ function getPrettierParser(extension: string): string | null {
 
 let chalk: typeof chalkType
 let inquirer: typeof inquirerType
-let ora: typeof oraType
+let ora: typeof oraType | null = null
 
-const spinnerPromise = import("ora").then((oraModule) => {
-  ora = oraModule.default
-  return ora("Setting everything up...").start()
-})
+// Define a type for our custom spinner
+interface CustomSpinner {
+  start: (text?: string) => CustomSpinner
+  succeed: (text?: string) => void
+  fail: (text?: string) => void
+  text?: string
+}
 
-Promise.all([
-  import("chalk").then((chalkModule) => chalkModule.default),
-  import("inquirer").then((inquirerModule) => inquirerModule.default),
-  spinnerPromise,
-])
-  .then(([chalkModule, inquirerModule, spinner]) => {
-    chalk = chalkModule
-    inquirer = inquirerModule
-    spinner.succeed("Setup complete")
-    configQuestions(main, chalk, inquirer)
-  })
-  .catch((err) => {
-    spinnerPromise.then((spinner) => {
-      spinner.fail("An error occurred during setup")
+// Optional spinner function
+function createSpinner(message: string, useSpinner: boolean = true): CustomSpinner {
+  const spinnerPromise = import("ora")
+    .then((oraModule) => {
+      ora = oraModule.default
     })
-    console.error(err)
-  })
+    .catch(() => {
+      console.warn("Ora spinner not available. Falling back to console logging.")
+    })
 
-async function main(
+  Promise.all([
+    import("chalk").then((chalkModule) => chalkModule.default),
+    import("inquirer").then((inquirerModule) => inquirerModule.default),
+    spinnerPromise,
+  ])
+    .then(([chalkModule, inquirerModule]) => {
+      chalk = chalkModule
+      inquirer = inquirerModule
+      configQuestions(main, chalk, inquirer)
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+
+  if (!useSpinner || !ora) {
+    // Fallback spinner object
+    const spinner: CustomSpinner = {
+      text: message,
+      start: (text?: string) => {
+        spinner.text = text || message
+        console.log(spinner.text)
+        return spinner
+      },
+      succeed: (text?: string) => {
+        console.log(text || `${spinner.text} - succeeded`)
+      },
+      fail: (text?: string) => {
+        console.error(text || `${spinner.text} - failed`)
+      },
+    }
+    return spinner
+  }
+  return ora(message).start()
+}
+
+export async function main(
   repoPath: string,
   useLocalRepo: boolean,
   addLineNumbers: boolean,
@@ -92,6 +122,7 @@ async function main(
   outputFileName: fs.PathLike,
   outputFolderName: string,
   keepRepo: boolean,
+  useSpinner: boolean = true, // New optional parameter
 ) {
   const gitP = git()
   let tempDir = "./tempRepo"
@@ -108,19 +139,19 @@ async function main(
 
   let fileCount = 0
   let ignoreConfig: IgnoreConfig | null = null
-  const spinner = ora(chalk.blueBright("Setting everything up...")).start()
+  const spinner = createSpinner(chalk?.blueBright("Setting everything up...") || "Setting everything up...", useSpinner)
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
   try {
     if (useLocalRepo) {
       tempDir = repoPath
     } else {
-      spinner.start(chalk.blueBright("Cloning repository..."))
+      spinner.start(chalk?.blueBright("Cloning repository...") || "Cloning repository...")
       await gitP.clone(repoPath, tempDir)
-      spinner.succeed(chalk.greenBright("Repository cloned successfully"))
+      spinner.succeed(chalk?.greenBright("Repository cloned successfully") || "Repository cloned successfully")
     }
 
-    spinner.start(chalk.blueBright("Processing files..."))
+    spinner.start(chalk?.blueBright("Processing files...") || "Processing files...")
     ignoreConfig = await loadIgnoreConfig(tempDir)
     await appendFilesToPdf(tempDir, removeComments)
 
@@ -142,15 +173,20 @@ async function main(
       }
     }
 
-    spinner.succeed(chalk.greenBright(`${onePdfPerFile ? "PDFs" : "PDF"} created with ${fileCount} files processed.`))
+    spinner.succeed(
+      chalk?.greenBright(`${onePdfPerFile ? "PDFs" : "PDF"} created with ${fileCount} files processed.`) ||
+        `${onePdfPerFile ? "PDFs" : "PDF"} created with ${fileCount} files processed.`,
+    )
 
     if (!keepRepo && !useLocalRepo) {
       await delay(3000)
       fs.rmSync(tempDir, { recursive: true, force: true })
-      spinner.succeed(chalk.greenBright("Temporary repository has been deleted."))
+      spinner.succeed(
+        chalk?.greenBright("Temporary repository has been deleted.") || "Temporary repository has been deleted.",
+      )
     }
   } catch (err) {
-    spinner.fail(chalk.redBright("An error occurred"))
+    spinner.fail(chalk?.redBright("An error occurred") || "An error occurred")
     console.error(err)
   }
 
@@ -174,7 +210,9 @@ async function main(
 
       if (stat.isFile()) {
         fileCount++
-        spinner.text = chalk.blueBright(`Processing files... (${fileCount} processed)`)
+        spinner.text =
+          chalk?.blueBright(`Processing files... (${fileCount} processed)`) ||
+          `Processing files... (${fileCount} processed)`
         const fileName = path.relative(tempDir, filePath)
 
         if (onePdfPerFile) {
@@ -279,7 +317,10 @@ async function main(
 
   if (!onePdfPerFile) {
     doc?.on("finish", () => {
-      spinner.succeed(chalk.greenBright(`PDF created with ${fileCount} files processed.`))
+      spinner.succeed(
+        chalk?.greenBright(`PDF created with ${fileCount} files processed.`) ||
+          `PDF created with ${fileCount} files processed.`,
+      )
     })
   }
 }

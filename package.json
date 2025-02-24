@@ -2,15 +2,15 @@
   "name": "git2pdf",
   "version": "2.2.6",
   "description": "A CLI tool for generating a PDF document from a GitHub repository",
-  "main": "dist/clone.js",
+  "main": "dist/index.js",
   "bin": {
-    "git2pdf": "dist/clone.js"
+    "git2pdf": "dist/index.js"
   },
   "files": [
     "dist/**/*"
   ],
   "scripts": {
-    "start": "node dist/clone.js",
+    "start": "node dist/index.js",
     "watch": "tsc -w",
     "build": "tsc",
     "prepublishOnly": "npm run format && npm run build",
@@ -62,6 +62,7 @@
   ],
   "dependencies": {
     "chalk": "^5.4.1",
+    "commander": "^13.1.0",
     "highlight.js": "^11.9.0",
     "html-entities": "^2.3.6",
     "inquirer": "^9.2.6",
