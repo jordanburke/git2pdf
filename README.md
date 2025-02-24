@@ -1,122 +1,84 @@
-# repo2pdf
+# git2pdf
 
-![npm](https://img.shields.io/npm/v/repo2pdf)
-![npm](https://img.shields.io/npm/dt/repo2pdf)
-![NPM](https://img.shields.io/npm/l/repo2pdf)
-![GitHub issues](https://img.shields.io/github/issues/BankkRoll/repo2pdf)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/BankkRoll/repo2pdf)
-![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)
-![GitHub Stars](https://img.shields.io/github/stars/BankkRoll/repo2pdf)
-![GitHub Forks](https://img.shields.io/github/forks/BankkRoll/repo2pdf)
+A powerful CLI tool for generating PDF documents from GitHub repositories with enhanced functionality.
 
-#### NPM: https://www.npmjs.com/package/repo2pdf
+## Overview
 
-#### Website: https://repo2pdf.site
+git2pdf is a versatile command-line tool designed to transform GitHub repositories into well-formatted, visually engaging PDF files. This tool automates the process of cloning repositories and parsing code files, serving various use cases including:
 
-repo2pdf is an innovative and versatile tool designed to seamlessly transform GitHub repositories into well-formatted, visually engaging, and easy-to-navigate PDF files. By automating the process of cloning repositories and parsing code files, repo2pdf serves a variety of use-cases including teaching, code reviews, offline referencing, archiving, AI training, and document embedding. The tool's flexibility expands the horizons of interacting with codebases by bridging the gap between the dynamic world of coding and the static, universally accessible format of PDFs, catering to a multitude of user needs and creative applications.
-
-- [repo2pdf](#repo2pdf)
-  - [Installation and Usage](#installation-and-usage)
-    - [Installing and Using repo2pdf with NPX](#installing-and-using-repo2pdf-with-npx)
-    - [Installing and Using repo2pdf by Cloning the Repository](#installing-and-using-repo2pdf-by-cloning-the-repository)
-  - [Configuration](#configuration)
-    - [Example of file structure](#example-of-file-structure)
-  - [Troubleshooting / FAQ](#troubleshooting--faq)
-  - [Contributing to repo2pdf](#contributing-to-repo2pdf)
-    - [Reporting Bugs](#reporting-bugs)
-    - [Suggesting Enhancements](#suggesting-enhancements)
-    - [Writing Code](#writing-code)
-  - [Meet Our Contributors](#meet-our-contributors)
-  - [License](#license)
-  - [Star History](#star-history)
-
----
+- Code reviews and documentation
+- Offline reference materials
+- Teaching materials
+- Technical documentation
+- Code archiving
+- Integration with AI systems
 
 ## Installation and Usage
 
-repo2pdf can be installed by either [directly using NPX](#installing-and-using-repo2pdf-with-npx) or [cloning the repository from GitHub](#installing-and-using-repo2pdf-by-cloning-the-repository). The steps and prompts vary based on the chosen method.
-
-> NEW! Use the webapp [here](https://repo2pdf.site)
-
----
-
-### Installing and Using repo2pdf with NPX
-
-This method downloads and installs the latest version of repo2pdf from the NPM registry.
-
-1. Install repo2pdf using NPX:
+git2pdf can be installed using NPM:
 
 ```shell
-npx repo2pdf
+npm install -g git2pdf
 ```
 
-2. The script will start running. Follow the prompt and provide the necessary information.
-   - GitHub repository URL
-   - Output file name
-   - Decision on whether to keep the cloned repository (Y/N)
-
----
-
-### Installing and Using repo2pdf by Cloning the Repository
-
-This method involves manually cloning the repo2pdf repository and setting it up on your local machine.
-
-1. Clone the repository:
+Or used directly with NPX:
 
 ```shell
-git clone https://github.com/BankkRoll/repo2pdf
+npx git2pdf
 ```
 
-2. Navigate to the repo2pdf directory:
+### Usage
 
 ```shell
-cd repo2pdf
+git2pdf [repository] [options]
 ```
 
-3. Install the dependencies:
+#### Options
+
+- `-l, --local`: Use a local repository
+- `-o, --output <file>`: Output file name (default: output.pdf)
+- `-d, --dir <directory>`: Output directory for individual PDFs (default: ./output)
+- `--line-numbers`: Add line numbers to code in PDF
+- `--highlighting`: Add syntax highlighting in PDF
+- `--page-numbers`: Add page numbers to PDF
+- `--remove-comments`: Remove comments from code
+- `--remove-empty`: Remove empty lines
+- `--split`: Generate one PDF per file
+- `--keep-repo`: Keep cloned repository after processing
+- `-h, --help`: Display help information
+- `-V, --version`: Display version number
+
+### Examples
+
+Generate a PDF from a GitHub repository:
 
 ```shell
-npm install
+git2pdf https://github.com/user/repo
 ```
 
-4. Build the script:
+Generate a PDF with line numbers and syntax highlighting:
 
 ```shell
-npm run build
+git2pdf https://github.com/user/repo --line-numbers --highlighting
 ```
 
-5. Run the script:
+Use a local repository:
 
 ```shell
-npm start
+git2pdf -l ./my-local-repo --output my-docs.pdf
 ```
 
-6. The script will start running. Follow the prompt and provide the necessary information:
-   - Decision on whether to clone a repository or use a local repository
-     - If using a local repository, provide the path
-     - If cloning a repository, provide the URL
-   - Features checklist for
-     - add line numbers in the PDF
-     - add page numbers in the PDF
-     - add highlighting in the PDF
-     - remove comments from the code
-     - remove empty lines from the code
-     - one file or one PDF per file
-   - Name of the output PDF file or output directory
-   - Decision on whether to keep the cloned repository after generating the PDF
+Create separate PDFs for each file:
 
-Please note that you need to have Node > 18 and git(for non-local repos) installed on your system in order to run repo2pdf.
-
----
+```shell
+git2pdf https://github.com/user/repo --split --dir ./output
+```
 
 ## Configuration
 
-repo2pdf automatically ignores certain file types and directories (e.g., `.png`, `.git`).
-To customize the files and directories to ignore, you can add a `repo2pdf.ignore` file to the root of your repository.
+git2pdf automatically ignores certain file types and directories (e.g., `.png`, `.git`).
 
-Please note that if you use a local repository, the `repo2pdf.ignore` file must be in the root of the repository directory. And you might need to add more directories to the ignore list, as the script does not automatically ignores different build files and directories.
-
-### Example of file structure
+To customize the files and directories to ignore, you can add a `git2pdf.ignore` file to the root of your repository:
 
 ```json
 {
@@ -125,113 +87,17 @@ Please note that if you use a local repository, the `repo2pdf.ignore` file must 
 }
 ```
 
----
+## Requirements
 
-## Troubleshooting / FAQ
+- Node.js >= 18.0.0
+- Git (for non-local repositories)
 
-<details>
-  <summary>Q: I'm getting an error "Failed to install [package-name]". What should I do?</summary>
-  A: Make sure you have Node.js and npm installed on your system. Try running the following command to install the required package manually:
+## Contributing
 
-```shell
-npm install [package-name]
-```
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-</details>
-
-<details>
-  <summary>Q: How can I customize the styling of the generated PDF?</summary>
-  A: You can modify the code in `clone.ts` or `syntax.ts` to change the font, font size, colors, and other styling options for the PDF document.
-
-```typescript
-// Example: Changing font size in syntax.ts
-doc.fontSize(12)
-```
-
-</details>
-
-<details>
-  <summary>Q: What types of files are supported for conversion to PDF?</summary>
-  A: Currently, repo2pdf supports all text-based files for conversion to PDF. Binary files like images or compiled binaries are ignored.
-</details>
-
-<details>
-  <summary>Q: How can I modify the ignored files list?</summary>
-  A: You can add a `repo2pdf.ignore` file to the root of your repository to customize the list of ignored files. Here's an example of how to structure this file:
-
-```json
-{
-  "ignoredFiles": ["tsconfig.json"],
-  "ignoredExtensions": [".md"]
-}
-```
-
-</details>
-
-<details>
-  <summary>Q: How can I include line numbers in the generated PDF?</summary>
-  A: During the execution of the script, you'll be prompted with the question "Include line numbers?". Answering 'Y' will include line numbers in the generated PDF.
-</details>
-
-<details>
-  <summary>Q: How can I keep the cloned repository after generating the PDF?</summary>
-  A: You'll be asked "Keep cloned repository?" during the script execution. Answer 'Y' to keep the cloned repository on your system after the PDF is generated.
-</details>
-
-<details>
-  <summary>Q: How can I generate a PDF for a local repository?</summary>
-  A: When running the script, you'll be asked to either clone a repository or use a local one. Choose the latter and provide the local repository path.
-</details>
-
----
-
-## Contributing to repo2pdf
-
-**Your insights, skills, and valuable time can make a huge difference in the evolution of repo2pdf!** We're always excited to see the community helping in shaping this tool to be even more efficient and feature-rich.
-
-### Reporting Bugs
-
-Encountered a hiccup? We're here to help! Please:
-
-1. Open an issue on GitHub detailing the bug.
-2. Describe the problem in depth. Share the steps to reproduce the issue and any error messages you received.
-3. If possible, provide information about your operating system and Node.js version.
-
-### Suggesting Enhancements
-
-Have a brilliant idea for a new feature or an improvement to an existing one? We're all ears! Please:
-
-1. Open an issue on GitHub to share your suggestions.
-2. Be as detailed as possible, explaining what you want to achieve and why it would be beneficial to the project.
-
-### Writing Code
-
-If you're up for rolling up your sleeves to contribute code to fix a bug or implement a new feature, here's how you can get started:
-
-1. Fork the repository.
-2. Create a new branch for your changes.
-3. Make your changes in your branch.
-4. Submit a pull request from your branch to the main repo2pdf repository.
-
-In your pull request, please provide a clear description of the changes you've made. We appreciate contributions that adhere to our coding conventions and are consistent with the existing codebase - it helps us maintain the quality of the project and makes the review process more efficient.
-
----
-
-### Meet Our Contributors
-
-We're ever grateful for the valuable contributions from our community. Meet the people who're helping shape repo2pdf:
-
-[![Contributors](https://contrib.rocks/image?repo=BankkRoll/repo2pdf)](https://github.com/BankkRoll/repo2pdf/graphs/contributors)
-
----
+This project is a fork of the original [repo2pdf](https://github.com/BankkRoll/repo2pdf) by BankkRoll, with enhanced CLI functionality and improvements.
 
 ## License
 
-repo2pdf is open source software, licensed under the MIT License. See the `LICENSE` file for more information.
-
-## Star History
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=BankkRoll/repo2pdf&type=Date&theme=dark">
-  <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=BankkRoll/repo2pdf&type=Date">
-</picture>
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.

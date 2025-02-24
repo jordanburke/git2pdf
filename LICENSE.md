@@ -1,6 +1,7 @@
 MIT License
 
-Copyright (c) 2023 BankkRoll
+Copyright (c) 2025 Jordan Burke
+Based on work copyright (c) 2023 Repo2PDF
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
