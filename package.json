@@ -1,11 +1,14 @@
 {
   "name": "git2pdf",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "description": "A CLI tool for generating a PDF document from a GitHub repository",
   "main": "dist/clone.js",
   "bin": {
     "git2pdf": "dist/clone.js"
   },
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "start": "node dist/clone.js",
     "watch": "tsc -w",
@@ -16,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jordanburke/repo2pdf.git"
+    "url": "https://github.com/jordanburke/git2pdf.git"
   },
   "keywords": [
     "github",
@@ -35,11 +38,15 @@
   "author": "Jordan Burke",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/BankkRoll/Repo-to-PDF/issues"
+    "url": "https://github.com/jordanburke/git2pdf/issues"
   },
-  "homepage": "https://github.com/BankkRoll/Repo-to-PDF#readme",
-  "documentation": "https://github.com/BankkRoll/Repo-to-PDF#readme",
+  "homepage": "https://github.com/jordanburke/git2pdf#readme",
+  "documentation": "https://github.com/jordanburke/git2pdf#readme",
   "contributors": [
+    {
+      "name": "BankkRoll",
+      "url": "https://github.com/BankkRoll"
+    },
     {
       "name": "malpou",
       "url": "https://github.com/malpou"
