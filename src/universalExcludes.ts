@@ -23,6 +23,7 @@ const universalExcludedExtensions = [
   ".webp",
   ".ico",
   ".mp4",
+  ".mp3",
   ".mov",
   ".avi",
   ".wmv",
