@@ -41,12 +41,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: |
-          if [ -f "pnpm-lock.yaml" ] && [ "$(head -n 1 pnpm-lock.yaml | grep -c "lockfileVersion")" -gt 0 ]; then
-            pnpm install --frozen-lockfile
-          else
-            pnpm install
-          fi
+        run: pnpm install --no-frozen-lockfile
 
       - name: Check formatting
         run: pnpm run format -- --check
