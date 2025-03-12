@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// File: src/index.ts
 import { parseCliArgs } from "./cliParser"
 import { configQuestions } from "./configHandler"
 import { main } from "./clone"
@@ -21,7 +22,9 @@ async function start() {
         args.outputFolderName,
         args.keepRepo,
         false,
+        args.filePath, // Pass the new filePath parameter
       )
+
       process.exit(0)
     } else {
       const chalk = (await import("chalk")).default

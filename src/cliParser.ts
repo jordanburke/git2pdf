@@ -6,7 +6,6 @@ import type { Arguments } from "./types"
 
 export function createCliParser(): Command {
   const program = new Command()
-
   // Read version from package.json
   const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../package.json"), "utf8"))
 
@@ -25,18 +24,22 @@ export function createCliParser(): Command {
     .option("--remove-empty", "Remove empty lines")
     .option("--split", "Generate one PDF per file")
     .option("--keep-repo", "Keep cloned repository after processing")
+    .option("-f, --file <path>", "Specific file or directory path within the repository to process")
     .addHelpText(
       "after",
       `
 Examples:
-  # Process remote repository
-  $ git2pdf https://github.com/user/repo --line-numbers --highlighting
+# Process remote repository
+$ git2pdf https://github.com/user/repo --line-numbers --highlighting
 
-  # Process local repository
-  $ git2pdf -l ./my-local-repo --output my-docs.pdf
+# Process local repository
+$ git2pdf -l ./my-local-repo --output my-docs.pdf
 
-  # Generate separate PDFs for each file
-  $ git2pdf https://github.com/user/repo --split --dir ./output
+# Generate separate PDFs for each file
+$ git2pdf https://github.com/user/repo --split --dir ./output
+
+# Process only a specific file or directory within a repository
+$ git2pdf https://github.com/user/repo --file src/components
 `,
     )
 
@@ -89,7 +92,9 @@ export function parseCliArgs(argv: string[]): Arguments | null {
     outputFileName: options.output,
     outputFolderName: options.dir,
     keepRepo: options.keepRepo || false,
+    filePath: options.file, // Add the new parameter
   }
+
   console.info("Running with:", params)
   return params
 }

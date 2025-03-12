@@ -1,5 +1,5 @@
+// File: src/configHandler.ts
 import fs from "fs"
-
 //@ts-ignore
 import type chalkType from "chalk"
 //@ts-ignore
@@ -53,6 +53,22 @@ export async function configQuestions(main: Function, chalk: typeof chalkType, i
           return true
         }
         return "Please enter a valid GitHub repository URL."
+      },
+    },
+    {
+      type: "list",
+      name: "useSpecificPath",
+      message: "Process the entire repository or a specific file/directory?",
+      choices: ["Entire repository", "Specific path"],
+      filter: function (val: string) {
+        return val === "Specific path"
+      },
+    },
+    {
+      name: "filePath",
+      message: "Enter the specific file or directory path within the repository:",
+      when(answers: { useSpecificPath: boolean }) {
+        return answers.useSpecificPath
       },
     },
     {
@@ -114,7 +130,7 @@ export async function configQuestions(main: Function, chalk: typeof chalkType, i
   const answers = await inquirer.prompt(questions)
   console.log(chalk.cyanBright("\nProcessing your request...\n"))
 
-  const { localRepo, localRepoPath, repoUrl, features, outputFileName, outputFolderName, keepRepo } = answers
+  const { localRepo, localRepoPath, repoUrl, features, outputFileName, outputFolderName, keepRepo, filePath } = answers
 
   main(
     localRepo ? localRepoPath : repoUrl,
@@ -128,5 +144,7 @@ export async function configQuestions(main: Function, chalk: typeof chalkType, i
     outputFileName,
     outputFolderName,
     keepRepo,
+    true, // useSpinner
+    filePath, // Pass the specific file path
   )
 }

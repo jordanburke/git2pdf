@@ -16,4 +16,5 @@ export interface Arguments {
   outputFileName: string
   outputFolderName: string
   keepRepo: boolean
+  filePath?: string // New optional parameter for specific file path
 }

@@ -122,12 +122,13 @@ export async function main(
   outputFileName: fs.PathLike,
   outputFolderName: string,
   keepRepo: boolean,
-  useSpinner: boolean = true, // New optional parameter
+  useSpinner: boolean = true,
+  specificFilePath?: string, // New parameter
 ) {
   const gitP = git()
   let tempDir = "./tempRepo"
-
   let doc: typeof PDFDocument | null = null
+
   if (!onePdfPerFile) {
     doc = new PDFDocument({
       bufferPages: true,
@@ -139,7 +140,9 @@ export async function main(
 
   let fileCount = 0
   let ignoreConfig: IgnoreConfig | null = null
+
   const spinner = createSpinner(chalk?.blueBright("Setting everything up...") || "Setting everything up...", useSpinner)
+
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
   try {
@@ -152,8 +155,43 @@ export async function main(
     }
 
     spinner.start(chalk?.blueBright("Processing files...") || "Processing files...")
+
     ignoreConfig = await loadIgnoreConfig(tempDir)
-    await appendFilesToPdf(tempDir, removeComments)
+
+    // Modify to handle specific file path
+    if (specificFilePath) {
+      const fullPath = path.join(tempDir, specificFilePath)
+
+      if (!fs.existsSync(fullPath)) {
+        spinner.fail(
+          chalk?.redBright(`Specified path not found: ${specificFilePath}`) ||
+            `Specified path not found: ${specificFilePath}`,
+        )
+        process.exit(1)
+      }
+
+      const stat = await fsPromises.stat(fullPath)
+
+      if (stat.isFile()) {
+        // Process single file
+        await processFile(
+          fullPath,
+          doc,
+          tempDir,
+          removeComments,
+          fileCount,
+          addLineNumbers,
+          addHighlighting,
+          removeEmptyLines,
+        )
+      } else if (stat.isDirectory()) {
+        // Process only files in the specified directory
+        await appendFilesToPdf(fullPath, removeComments)
+      }
+    } else {
+      // Process entire repository
+      await appendFilesToPdf(tempDir, removeComments)
+    }
 
     if (!onePdfPerFile) {
       if (doc) {
@@ -190,6 +228,120 @@ export async function main(
     console.error(err)
   }
 
+  // Extract the file processing logic to a separate function
+  async function processFile(
+    filePath: string,
+    doc: typeof PDFDocument | null,
+    tempDir: string,
+    removeComments: boolean,
+    fileCount: number,
+    addLineNumbers: boolean,
+    addHighlighting: boolean,
+    removeEmptyLines: boolean,
+  ) {
+    fileCount++
+    spinner.text =
+      chalk?.blueBright(`Processing files... (${fileCount} processed)`) ||
+      `Processing files... (${fileCount} processed)`
+
+    const fileName = path.relative(tempDir, filePath)
+
+    if (onePdfPerFile) {
+      doc = new PDFDocument({
+        bufferPages: true,
+        autoFirstPage: false,
+      })
+      const pdfFileName = path.join(outputFolderName, fileName.replace(path.sep, "_")).concat(".pdf")
+      await fsPromises.mkdir(path.dirname(pdfFileName), {
+        recursive: true,
+      })
+      doc.pipe(fs.createWriteStream(pdfFileName))
+      doc.addPage()
+    }
+
+    if (doc) {
+      // Add file header
+      if (fileCount > 1) doc.addPage()
+      doc
+        .font("Courier")
+        .fontSize(10)
+        .fillColor("#666666")
+        .text(`// File: ${fileName}`, { lineGap: 4 })
+        .fillColor("black")
+
+      if (isBinaryFileSync(filePath)) {
+        const data = fs.readFileSync(filePath).toString("base64")
+        doc.text(`\nBASE64:\n\n${data}`, { lineGap: 4 })
+      } else {
+        let data = await fsPromises.readFile(filePath, "utf8")
+
+        // Determine parser and format with Prettier if supported
+        const extension = path.extname(filePath).slice(1)
+        const parser = getPrettierParser(extension)
+        if (parser) {
+          try {
+            data = await prettier.format(data, { parser })
+          } catch (error: unknown) {
+            const errorMessage = (error as Error).message.split("\n")[0]
+            console.warn(`Plain text fallback at ${filePath}: ${errorMessage}`)
+          }
+        }
+
+        data = data.replace(/\t/g, " ")
+        data = data.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
+
+        if (removeComments) {
+          data = strip(data)
+        }
+
+        if (removeEmptyLines) {
+          data = data.replace(/^\s*[\r\n]/gm, "")
+        }
+
+        let highlightedCode
+        try {
+          if (addHighlighting && hljs.getLanguage(extension)) {
+            highlightedCode = hljs.highlight(data, {
+              language: extension,
+            }).value
+          } else {
+            highlightedCode = hljs.highlight(data, {
+              language: "plaintext",
+            }).value
+          }
+        } catch (error) {
+          highlightedCode = hljs.highlight(data, {
+            language: "plaintext",
+          }).value
+        }
+
+        const hlData = htmlToJson(highlightedCode, removeEmptyLines)
+        let lineNum = 1
+        const lineNumWidth = hlData.filter((d) => d.text === "\n").length.toString().length
+
+        for (let i = 0; i < hlData.length; i++) {
+          const { text, color } = hlData[i]
+          if (i === 0 || hlData[i - 1]?.text === "\n")
+            if (addLineNumbers) {
+              doc.text(String(lineNum++).padStart(lineNumWidth, " ") + " ", {
+                continued: true,
+                textIndent: 0,
+              })
+            }
+          doc.fillColor(color || "black")
+          if (text !== "\n") doc.text(text, { continued: true })
+          else doc.text(text)
+        }
+      }
+    }
+
+    if (onePdfPerFile) {
+      doc?.end()
+    }
+
+    return fileCount
+  }
+
   async function appendFilesToPdf(directory: string, removeComments = false) {
     const files = await fsPromises.readdir(directory)
 
@@ -209,106 +361,17 @@ export async function main(
       }
 
       if (stat.isFile()) {
+        await processFile(
+          filePath,
+          doc,
+          tempDir,
+          removeComments,
+          fileCount,
+          addLineNumbers,
+          addHighlighting,
+          removeEmptyLines,
+        )
         fileCount++
-        spinner.text =
-          chalk?.blueBright(`Processing files... (${fileCount} processed)`) ||
-          `Processing files... (${fileCount} processed)`
-        const fileName = path.relative(tempDir, filePath)
-
-        if (onePdfPerFile) {
-          doc = new PDFDocument({
-            bufferPages: true,
-            autoFirstPage: false,
-          })
-
-          const pdfFileName = path.join(outputFolderName, fileName.replace(path.sep, "_")).concat(".pdf")
-
-          await fsPromises.mkdir(path.dirname(pdfFileName), {
-            recursive: true,
-          })
-          doc.pipe(fs.createWriteStream(pdfFileName))
-          doc.addPage()
-        }
-
-        if (doc) {
-          // Add file header for all files
-          if (fileCount > 1) doc.addPage()
-          doc
-            .font("Courier")
-            .fontSize(10)
-            .fillColor("#666666")
-            .text(`// File: ${fileName}`, { lineGap: 4 })
-            .fillColor("black")
-
-          if (isBinaryFileSync(filePath)) {
-            const data = fs.readFileSync(filePath).toString("base64")
-            doc.text(`\nBASE64:\n\n${data}`, { lineGap: 4 })
-          } else {
-            let data = await fsPromises.readFile(filePath, "utf8")
-            // Determine parser and format with Prettier if supported
-            const extension = path.extname(filePath).slice(1)
-            const parser = getPrettierParser(extension)
-
-            if (parser) {
-              try {
-                data = await prettier.format(data, { parser })
-              } catch (error: unknown) {
-                const errorMessage = (error as Error).message.split("\n")[0]
-                console.warn(`Plain text fallback at ${filePath}: ${errorMessage}`)
-              }
-            }
-
-            data = data.replace(/\t/g, "    ")
-            data = data.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
-
-            if (removeComments) {
-              data = strip(data)
-            }
-
-            if (removeEmptyLines) {
-              data = data.replace(/^\s*[\r\n]/gm, "")
-            }
-
-            let highlightedCode
-            try {
-              if (addHighlighting && hljs.getLanguage(extension)) {
-                highlightedCode = hljs.highlight(data, {
-                  language: extension,
-                }).value
-              } else {
-                highlightedCode = hljs.highlight(data, {
-                  language: "plaintext",
-                }).value
-              }
-            } catch (error) {
-              highlightedCode = hljs.highlight(data, {
-                language: "plaintext",
-              }).value
-            }
-
-            const hlData = htmlToJson(highlightedCode, removeEmptyLines)
-            let lineNum = 1
-            const lineNumWidth = hlData.filter((d) => d.text === "\n").length.toString().length
-            for (let i = 0; i < hlData.length; i++) {
-              const { text, color } = hlData[i]
-              if (i === 0 || hlData[i - 1]?.text === "\n")
-                if (addLineNumbers) {
-                  doc.text(String(lineNum++).padStart(lineNumWidth, " ") + " ", {
-                    continued: true,
-                    textIndent: 0,
-                  })
-                }
-              doc.fillColor(color || "black")
-
-              if (text !== "\n") doc.text(text, { continued: true })
-              else doc.text(text)
-            }
-          }
-        }
-
-        if (onePdfPerFile) {
-          doc?.end()
-        }
       } else if (stat.isDirectory()) {
         await appendFilesToPdf(filePath, removeComments)
       }
