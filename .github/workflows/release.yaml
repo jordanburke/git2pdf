@@ -44,7 +44,12 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          if [ -f "pnpm-lock.yaml" ] && [ "$(head -n 1 pnpm-lock.yaml | grep -c "lockfileVersion")" -gt 0 ]; then
+            pnpm install --frozen-lockfile
+          else
+            pnpm install
+          fi
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
