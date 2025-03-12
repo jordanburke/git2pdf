@@ -44,7 +44,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Check formatting
-        run: pnpm run format -- --check
+        run: pnpm run format:check
 
       - name: Build
         run: pnpm run build
