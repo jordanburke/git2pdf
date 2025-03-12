@@ -1,4 +1,23 @@
 node_modules
 .DS_Store
+dist
 src/cq-db
 src/core/config/types.ts
+
+# Build artifacts
+coverage
+.coverage
+
+# Generated files
+pnpm-lock.yaml
+*-lock.json
+*.lock
+
+# Changesets
+.changeset
+
+# Logs
+*.log
+
+# Build outputs
+lib
