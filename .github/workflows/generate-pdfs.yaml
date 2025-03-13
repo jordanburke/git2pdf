@@ -18,8 +18,25 @@ jobs:
         with:
           node-version: "20.x"
 
-      - name: Install git2pdf globally
-        run: npm install -g git2pdf
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build git2pdf
+        run: pnpm run build
+
+      - name: Install locally built git2pdf globally
+        run: npm install -g .
+
+      - name: Check git2pdf version and help
+        run: |
+          git2pdf --version
+          git2pdf --help
 
       - name: Create output directories
         run: |
@@ -29,16 +46,21 @@ jobs:
           mkdir -p pdf-outputs/individual-files
 
       - name: Generate full repository PDF
-        run: git2pdf -l . --output pdf-outputs/full/repo-full.pdf
+        run: git2pdf -l . --output pdf-outputs/full/repo-full.pdf --non-interactive
 
-      - name: Generate src-only PDF
-        run: git2pdf -l . --file src --output pdf-outputs/src-only/repo-src.pdf
+      - name: Generate src-only PDF using subdirectory
+        run: |
+          mkdir -p temp-src-only
+          cp -r src temp-src-only/
+          cd temp-src-only
+          git2pdf -l . --output ../pdf-outputs/src-only/repo-src.pdf --non-interactive
+          cd ..
 
       - name: Generate highlighted PDF with line numbers
-        run: git2pdf -l . --output pdf-outputs/highlighted/repo-highlighted.pdf --highlighting --line-numbers --page-numbers
+        run: git2pdf -l . --output pdf-outputs/highlighted/repo-highlighted.pdf --highlighting --line-numbers --page-numbers --non-interactive
 
       - name: Generate individual file PDFs
-        run: git2pdf -l . --split --dir pdf-outputs/individual-files
+        run: git2pdf -l . --split --dir pdf-outputs/individual-files --non-interactive
 
       - name: Upload full repository PDF
         uses: actions/upload-artifact@v4
