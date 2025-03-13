@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { configQuestions } from "./configHandler"
 import { main } from "./clone"
 import { normalizeLocalPath } from "./pathUtils"
