@@ -123,7 +123,8 @@ export async function main(
   outputFolderName: string,
   keepRepo: boolean,
   useSpinner: boolean = true,
-  specificFilePath?: string, // New parameter
+  specificFilePath?: string, // Parameter for specific file path
+  nonInteractive: boolean = false, // New parameter for non-interactive mode
 ) {
   const gitP = git()
   let tempDir = "./tempRepo"

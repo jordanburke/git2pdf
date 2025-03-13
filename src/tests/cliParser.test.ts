@@ -116,6 +116,7 @@ describe("CLI Parser", () => {
         outputFolderName: "./output",
         keepRepo: false,
         filePath: undefined,
+        nonInteractive: false,
       })
       expect(consoleInfoMock).toHaveBeenCalled()
     })
@@ -151,6 +152,7 @@ describe("CLI Parser", () => {
         outputFolderName: "./output",
         keepRepo: false,
         filePath: "src/components",
+        nonInteractive: false,
       })
     })
   })

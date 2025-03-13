@@ -16,5 +16,6 @@ export interface Arguments {
   outputFileName: string
   outputFolderName: string
   keepRepo: boolean
-  filePath?: string // New optional parameter for specific file path
+  filePath?: string // Optional parameter for specific file path
+  nonInteractive: boolean // New property for non-interactive mode
 }

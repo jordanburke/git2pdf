@@ -6,7 +6,9 @@
   "bin": {
     "git2pdf": "dist/index.js"
   },
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "start": "node dist/index.js",
     "watch": "tsc -w",
