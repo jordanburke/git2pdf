@@ -88,9 +88,6 @@
     "@types/strip-comments": "^2.0.1",
     "typescript": "^5.7.3",
     "vitest": "^1.4.0",
-    "@vitest/coverage-v8": "^1.4.0",
-    "typedoc": "^0.25.13",
-    "dependency-cruiser": "^15.0.0",
-    "source-map-explorer": "^2.5.3"
+    "@vitest/coverage-v8": "^1.4.0"
   }
 }

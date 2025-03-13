@@ -1,0 +1,69 @@
+name: Generate PDFs
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  generate-pdfs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Install git2pdf globally
+        run: npm install -g git2pdf
+
+      - name: Create output directories
+        run: |
+          mkdir -p pdf-outputs/full
+          mkdir -p pdf-outputs/src-only
+          mkdir -p pdf-outputs/highlighted
+          mkdir -p pdf-outputs/individual-files
+
+      - name: Generate full repository PDF
+        run: git2pdf -l . --output pdf-outputs/full/repo-full.pdf
+
+      - name: Generate src-only PDF
+        run: git2pdf -l . --file src --output pdf-outputs/src-only/repo-src.pdf
+
+      - name: Generate highlighted PDF with line numbers
+        run: git2pdf -l . --output pdf-outputs/highlighted/repo-highlighted.pdf --highlighting --line-numbers --page-numbers
+
+      - name: Generate individual file PDFs
+        run: git2pdf -l . --split --dir pdf-outputs/individual-files
+
+      - name: Upload full repository PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-repository-pdf
+          path: pdf-outputs/full/repo-full.pdf
+          retention-days: 7
+
+      - name: Upload src-only PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: src-only-pdf
+          path: pdf-outputs/src-only/repo-src.pdf
+          retention-days: 7
+
+      - name: Upload highlighted PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: highlighted-pdf
+          path: pdf-outputs/highlighted/repo-highlighted.pdf
+          retention-days: 7
+
+      - name: Upload individual file PDFs
+        uses: actions/upload-artifact@v4
+        with:
+          name: individual-file-pdfs
+          path: pdf-outputs/individual-files
+          retention-days: 7
