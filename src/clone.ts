@@ -123,28 +123,41 @@ export async function main(
   outputFolderName: string,
   keepRepo: boolean,
   useSpinner: boolean = true,
-  specificFilePath?: string, // Parameter for specific file path
-  nonInteractive: boolean = false, // New parameter for non-interactive mode
-) {
+  specificFilePath?: string,
+  nonInteractive: boolean = false,
+): Promise<void> {
   const gitP = git()
   let tempDir = "./tempRepo"
   let doc: typeof PDFDocument | null = null
+  let fileCount = 0
+  let ignoreConfig: IgnoreConfig | null = null
+
+  // Create a promise to track PDF completion
+  let pdfComplete: Promise<void>
+  let resolvePdfComplete: () => void
+  pdfComplete = new Promise((resolve) => {
+    resolvePdfComplete = resolve
+  })
 
   if (!onePdfPerFile) {
     doc = new PDFDocument({
       bufferPages: true,
       autoFirstPage: false,
     })
-    doc.pipe(fs.createWriteStream(outputFileName))
+
+    // Create write stream
+    const writeStream = fs.createWriteStream(outputFileName)
+    doc.pipe(writeStream)
+
+    // Listen for completion
+    writeStream.on("finish", () => {
+      resolvePdfComplete()
+    })
+
     doc.addPage()
   }
 
-  let fileCount = 0
-  let ignoreConfig: IgnoreConfig | null = null
-
   const spinner = createSpinner(chalk?.blueBright("Setting everything up...") || "Setting everything up...", useSpinner)
-
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
   try {
     if (useLocalRepo) {
@@ -156,25 +169,20 @@ export async function main(
     }
 
     spinner.start(chalk?.blueBright("Processing files...") || "Processing files...")
-
     ignoreConfig = await loadIgnoreConfig(tempDir)
 
-    // Modify to handle specific file path
     if (specificFilePath) {
       const fullPath = path.join(tempDir, specificFilePath)
-
       if (!fs.existsSync(fullPath)) {
         spinner.fail(
           chalk?.redBright(`Specified path not found: ${specificFilePath}`) ||
             `Specified path not found: ${specificFilePath}`,
         )
-        process.exit(1)
+        throw new Error(`Specified path not found: ${specificFilePath}`)
       }
 
       const stat = await fsPromises.stat(fullPath)
-
       if (stat.isFile()) {
-        // Process single file
         await processFile(
           fullPath,
           doc,
@@ -186,30 +194,29 @@ export async function main(
           removeEmptyLines,
         )
       } else if (stat.isDirectory()) {
-        // Process only files in the specified directory
         await appendFilesToPdf(fullPath, removeComments)
       }
     } else {
-      // Process entire repository
       await appendFilesToPdf(tempDir, removeComments)
     }
 
-    if (!onePdfPerFile) {
-      if (doc) {
-        const pages = doc.bufferedPageRange()
-        for (let i = 0; i < pages.count; i++) {
-          doc.switchToPage(i)
-          if (addPageNumbers) {
-            const oldBottomMargin = doc.page.margins.bottom
-            doc.page.margins.bottom = 0
-            doc.text(`Page: ${i + 1} of ${pages.count}`, 0, doc.page.height - oldBottomMargin / 2, {
-              align: "center",
-            })
-            doc.page.margins.bottom = oldBottomMargin
-          }
+    if (!onePdfPerFile && doc) {
+      const pages = doc.bufferedPageRange()
+      for (let i = 0; i < pages.count; i++) {
+        doc.switchToPage(i)
+        if (addPageNumbers) {
+          const oldBottomMargin = doc.page.margins.bottom
+          doc.page.margins.bottom = 0
+          doc.text(`Page: ${i + 1} of ${pages.count}`, 0, doc.page.height - oldBottomMargin / 2, {
+            align: "center",
+          })
+          doc.page.margins.bottom = oldBottomMargin
         }
-        doc.end()
       }
+      doc.end()
+
+      // Wait for PDF to complete
+      await pdfComplete
     }
 
     spinner.succeed(
@@ -218,7 +225,7 @@ export async function main(
     )
 
     if (!keepRepo && !useLocalRepo) {
-      await delay(3000)
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       fs.rmSync(tempDir, { recursive: true, force: true })
       spinner.succeed(
         chalk?.greenBright("Temporary repository has been deleted.") || "Temporary repository has been deleted.",
@@ -226,7 +233,7 @@ export async function main(
     }
   } catch (err) {
     spinner.fail(chalk?.redBright("An error occurred") || "An error occurred")
-    console.error(err)
+    throw err
   }
 
   // Extract the file processing logic to a separate function

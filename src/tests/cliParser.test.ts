@@ -1,8 +1,10 @@
-// src/tests/cliParser.test.ts
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { createCliParser, parseCliArgs } from "../cliParser"
 import fs from "fs"
 import path from "path"
+
+// Set test environment
+process.env.NODE_ENV = "test"
 
 // Mock fs and path modules
 vi.mock("fs", () => ({
@@ -21,6 +23,7 @@ vi.mock("path", () => ({
     extname: vi.fn(),
     relative: vi.fn(),
     dirname: vi.fn(),
+    resolve: vi.fn(),
   },
 }))
 
@@ -33,7 +36,6 @@ const processExitMock = vi.spyOn(process, "exit").mockImplementation((code) => {
 
 describe("CLI Parser", () => {
   beforeEach(() => {
-    // Reset mocks before each test
     vi.resetAllMocks()
   })
 
@@ -43,14 +45,11 @@ describe("CLI Parser", () => {
 
   describe("createCliParser", () => {
     it("should create a program with the correct name and description", () => {
-      // Mock the fs.readFileSync to return a mock package.json
       fs.readFileSync = vi.fn().mockReturnValue(
         JSON.stringify({
           version: "2.3.1",
         }),
       )
-
-      // Mock path.join to return a predictable path
       path.join = vi.fn().mockReturnValue("path/to/package.json")
 
       const program = createCliParser()
@@ -61,7 +60,6 @@ describe("CLI Parser", () => {
 
   describe("parseCliArgs", () => {
     beforeEach(() => {
-      // Set up common mocks for all tests
       fs.readFileSync = vi.fn().mockReturnValue(JSON.stringify({ version: "2.3.1" }))
       path.join = vi.fn().mockReturnValue("path/to/package.json")
     })

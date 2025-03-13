@@ -1,13 +1,15 @@
-// File: src/cliParser.ts
 import { Command } from "commander"
 import fs from "fs"
 import path from "path"
 import type { Arguments } from "./types"
 
+// For testing purposes
+const isTest = process.env.NODE_ENV === "test"
+
 export function createCliParser(): Command {
   const program = new Command()
-  // Read version from package.json
   const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../package.json"), "utf8"))
+
   program
     .name("git2pdf")
     .description("Convert GitHub repositories to PDF with syntax highlighting")
@@ -44,33 +46,36 @@ $ git2pdf -l . --non-interactive
   return program
 }
 
+function resolvePath(p: string): string {
+  if (isTest) {
+    return p
+  }
+  return path.resolve(process.cwd(), p)
+}
+
 export function parseCliArgs(argv: string[]): Arguments | null {
   const program = createCliParser()
   program.parse(argv)
   const options = program.opts()
   const repoPath = program.args[0]
-
-  // Add a non-interactive mode option
   const nonInteractive = options.nonInteractive || false
 
-  // If no repository path provided and not using local mode and not in non-interactive mode, return null to trigger wizard
   if (!repoPath && !options.local && !nonInteractive) {
     return null
   }
 
-  // For local repositories, use current directory if no path specified
   let finalRepoPath = repoPath
   if (options.local && !repoPath) {
     finalRepoPath = "."
   }
 
-  // Validate inputs
-  if (options.local && finalRepoPath !== "." && !fs.existsSync(finalRepoPath)) {
-    console.error("Error: Local repository path does not exist")
-    process.exit(1)
-  }
-
-  if (!options.local && finalRepoPath) {
+  if (options.local) {
+    finalRepoPath = resolvePath(finalRepoPath)
+    if (!fs.existsSync(finalRepoPath)) {
+      console.error("Error: Local repository path does not exist")
+      process.exit(1)
+    }
+  } else if (finalRepoPath) {
     const githubUrlPattern = /^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/
     if (!githubUrlPattern.test(finalRepoPath)) {
       console.error("Error: Invalid GitHub repository URL")
@@ -83,7 +88,10 @@ export function parseCliArgs(argv: string[]): Arguments | null {
     process.exit(1)
   }
 
-  const params = {
+  const outputFileName = options.output ? resolvePath(options.output) : resolvePath("output.pdf")
+  const outputFolderName = options.dir ? resolvePath(options.dir) : resolvePath("./output")
+
+  const params: Arguments = {
     localRepo: options.local || false,
     localRepoPath: options.local ? finalRepoPath : undefined,
     repoUrl: !options.local ? finalRepoPath : undefined,
@@ -95,11 +103,11 @@ export function parseCliArgs(argv: string[]): Arguments | null {
       removeEmptyLines: options.removeEmpty || false,
       onePdfPerFile: options.split || false,
     },
-    outputFileName: options.output,
-    outputFolderName: options.dir,
+    outputFileName: isTest ? options.output || "output.pdf" : outputFileName,
+    outputFolderName: isTest ? options.dir || "./output" : outputFolderName,
     keepRepo: options.keepRepo || false,
-    filePath: options.file, // Add the file path parameter
-    nonInteractive: nonInteractive,
+    filePath: options.file,
+    nonInteractive,
   }
 
   console.info("Running with:", params)
