@@ -83,7 +83,6 @@ function createSpinner(message: string, useSpinner: boolean = true): CustomSpinn
     .then(([chalkModule, inquirerModule]) => {
       chalk = chalkModule
       inquirer = inquirerModule
-      configQuestions(main, chalk, inquirer)
     })
     .catch((err) => {
       console.error(err)
