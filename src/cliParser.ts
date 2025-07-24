@@ -73,18 +73,27 @@ export function parseCliArgs(argv: string[]): Arguments | null {
     finalRepoPath = resolvePath(finalRepoPath)
     if (!fs.existsSync(finalRepoPath)) {
       console.error("Error: Local repository path does not exist")
+      if (isTest) {
+        throw new Error("Local repository path does not exist")
+      }
       process.exit(1)
     }
   } else if (finalRepoPath) {
     const githubUrlPattern = /^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/
     if (!githubUrlPattern.test(finalRepoPath)) {
       console.error("Error: Invalid GitHub repository URL")
+      if (isTest) {
+        throw new Error("Invalid GitHub repository URL")
+      }
       process.exit(1)
     }
   }
 
   if (options.split && !options.dir) {
     console.error("Error: --dir is required when using --split")
+    if (isTest) {
+      throw new Error("--dir is required when using --split")
+    }
     process.exit(1)
   }
 

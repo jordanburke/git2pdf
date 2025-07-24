@@ -72,24 +72,27 @@ describe("CLI Parser", () => {
     it("should validate local repository path exists", () => {
       fs.existsSync = vi.fn().mockReturnValue(false)
 
-      parseCliArgs(["node", "git2pdf", "/fake/path", "--local"])
+      expect(() => {
+        parseCliArgs(["node", "git2pdf", "/fake/path", "--local"])
+      }).toThrow("Local repository path does not exist")
 
       expect(consoleErrorMock).toHaveBeenCalledWith("Error: Local repository path does not exist")
-      expect(processExitMock).toHaveBeenCalledWith(1)
     })
 
     it("should validate GitHub URLs", () => {
-      parseCliArgs(["node", "git2pdf", "invalid-url"])
+      expect(() => {
+        parseCliArgs(["node", "git2pdf", "invalid-url"])
+      }).toThrow("Invalid GitHub repository URL")
 
       expect(consoleErrorMock).toHaveBeenCalledWith("Error: Invalid GitHub repository URL")
-      expect(processExitMock).toHaveBeenCalledWith(1)
     })
 
     it("should require dir when using split", () => {
-      parseCliArgs(["node", "git2pdf", "https://github.com/user/repo", "--split", "--dir", ""])
+      expect(() => {
+        parseCliArgs(["node", "git2pdf", "https://github.com/user/repo", "--split", "--dir", ""])
+      }).toThrow("--dir is required when using --split")
 
       expect(consoleErrorMock).toHaveBeenCalledWith("Error: --dir is required when using --split")
-      expect(processExitMock).toHaveBeenCalledWith(1)
     })
 
     it("should return correct params for a remote repository", () => {
