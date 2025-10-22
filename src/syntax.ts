@@ -37,21 +37,23 @@ export function htmlToJson(htmlCode: string, removeEmptyLines: boolean): { text:
     ["code", "#7F8C8D"], // Gray
   ])
 
-  const elementRegex = /<span\s+class="hljs-([^"]+)"[^>]*>([^<]*)(?:<\/span>)?/g
-  const nonelementRegex = /[^<]+|<\/span>|\n/g
+  // Single-pass sequential parser to maintain proper token order and whitespace
+  // Matches either: <span class="hljs-X">text</span> OR plain text
+  const combinedRegex = /<span\s+class="hljs-([^"]+)"[^>]*>([^<]*)<\/span>|[^<]+/g
 
   let match
-  while ((match = elementRegex.exec(htmlCode)) !== null) {
-    const [_, cls, text] = match
-    const color = colorMap.get(cls.split(" ")[0].toLowerCase()) || "black"
-    data.push({ text: decode(text), color })
-  }
-
-  htmlCode = htmlCode.replace(elementRegex, "")
-
-  while ((match = nonelementRegex.exec(htmlCode)) !== null) {
-    const text = match[0]
-    data.push({ text: text === "\n" ? text : decode(text) })
+  while ((match = combinedRegex.exec(htmlCode)) !== null) {
+    if (match[1] !== undefined) {
+      // It's a colored span element
+      const cls = match[1]
+      const text = match[2]
+      const color = colorMap.get(cls.split(" ")[0].toLowerCase()) || "black"
+      data.push({ text: decode(text), color })
+    } else {
+      // It's plain text between tags
+      const text = match[0]
+      data.push({ text: decode(text) })
+    }
   }
 
   const fixedData: { text: string; color?: string }[] = []

@@ -3,6 +3,22 @@
 A powerful CLI tool for generating PDF documents from GitHub repositories
 with enhanced functionality.
 
+## What's New in 2.4.0
+
+### 🎨 Improved Code Formatting
+
+We've completely rewritten the syntax highlighting parser to fix a critical bug that caused code to render as an unreadable blob. PDFs now display beautifully formatted code with proper spacing, indentation, and syntax highlighting!
+
+![Improved Code Formatting](improved-formatting.png)
+
+**Key improvements:**
+
+- ✅ Proper whitespace and token spacing preserved
+- ✅ Correct indentation maintained
+- ✅ Syntax highlighting colors applied accurately
+- ✅ Line numbers aligned properly
+- ✅ Sequential token order matches source code
+
 ## Overview
 
 git2pdf is a versatile command-line tool designed to transform GitHub
