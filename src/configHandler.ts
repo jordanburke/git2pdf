@@ -1,8 +1,8 @@
 // File: src/configHandler.ts
-import fs from "fs"
-//@ts-ignore
+//@ts-expect-error - Chalk is a dynamic ESM import
 import type chalkType from "chalk"
-//@ts-ignore
+import fs from "fs"
+//@ts-expect-error - Inquirer is a dynamic ESM import
 import type inquirerType from "inquirer"
 
 type QuestionType = {
@@ -13,10 +13,32 @@ type QuestionType = {
   filter?: (value: string) => boolean | string | string[]
   choices?: string[]
   default?: string | string[]
-  when?: (answers: any) => boolean
+  when?: (answers: Record<string, unknown>) => boolean
 }
 
-export async function configQuestions(main: Function, chalk: typeof chalkType, inquirer: typeof inquirerType) {
+export async function configQuestions(
+  main: (
+    repoPath: string,
+    useLocalRepo: boolean,
+    addLineNumbers: boolean,
+    addHighlighting: boolean,
+    addPageNumbers: boolean,
+    removeComments: boolean,
+    removeEmptyLines: boolean,
+    onePdfPerFile: boolean,
+    outputFileName: string,
+    outputFolderName: string,
+    keepRepo: boolean,
+    tabWidth?: number,
+    lineSpacing?: number,
+    codeFont?: string,
+    useSpinner?: boolean,
+    specificFilePath?: string,
+    nonInteractive?: boolean,
+  ) => Promise<void>,
+  chalk: typeof chalkType,
+  inquirer: typeof inquirerType,
+) {
   const questions: QuestionType[] = [
     {
       type: "list",
@@ -48,7 +70,7 @@ export async function configQuestions(main: Function, chalk: typeof chalkType, i
         return !answers.localRepo
       },
       validate: function (value: string) {
-        var pass = value.match(/^https:\/\/github.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/)
+        const pass = value.match(/^https:\/\/github.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/)
         if (pass) {
           return true
         }

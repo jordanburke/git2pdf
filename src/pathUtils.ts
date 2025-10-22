@@ -1,7 +1,8 @@
-import { resolve } from "path"
-import type { Arguments } from "./types"
-import { createCliParser } from "./cliParser"
 import fs from "fs"
+import { resolve } from "path"
+
+import { createCliParser } from "./cliParser"
+import type { Arguments } from "./types"
 
 export function normalizeLocalPath(path: string): string {
   return resolve(process.cwd(), path)

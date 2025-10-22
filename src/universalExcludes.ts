@@ -30,4 +30,4 @@ const universalExcludedExtensions = [
   ".pdf",
 ]
 
-export { universalExcludedNames, universalExcludedExtensions }
+export { universalExcludedExtensions, universalExcludedNames }

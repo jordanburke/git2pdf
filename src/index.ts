@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import { configQuestions } from "./configHandler"
-import { main } from "./clone"
-import { normalizeLocalPath } from "./pathUtils"
 import { parseCliArgs } from "./cliParser"
+import { main } from "./clone"
+import { configQuestions } from "./configHandler"
+import { normalizeLocalPath } from "./pathUtils"
 
 async function start(): Promise<void> {
   try {

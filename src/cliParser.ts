@@ -1,6 +1,7 @@
 import { Command } from "commander"
 import fs from "fs"
 import path from "path"
+
 import type { Arguments } from "./types"
 
 // For testing purposes

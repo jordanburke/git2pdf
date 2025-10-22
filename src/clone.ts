@@ -1,26 +1,24 @@
 #!/usr/bin/env node
 import fs from "fs"
 const fsPromises = fs.promises
-import path from "path"
-
-import git from "simple-git"
-import PDFDocument from "pdfkit"
-import hljs from "highlight.js"
-import { isBinaryFileSync } from "isbinaryfile"
-import strip from "strip-comments"
-import prettier from "prettier"
-
-import { htmlToJson } from "./syntax"
-import loadIgnoreConfig, { IgnoreConfig } from "./loadIgnoreConfig"
-import { universalExcludedExtensions, universalExcludedNames } from "./universalExcludes"
-import { configQuestions } from "./configHandler"
-
-//@ts-ignore
+//@ts-expect-error - Chalk is a dynamic ESM import
 import type chalkType from "chalk"
-//@ts-ignore
+import hljs from "highlight.js"
+//@ts-expect-error - Inquirer is a dynamic ESM import
 import type inquirerType from "inquirer"
-//@ts-ignore
+import { isBinaryFileSync } from "isbinaryfile"
+//@ts-expect-error - Ora is a dynamic ESM import
 import type oraType from "ora"
+import path from "path"
+import PDFDocument from "pdfkit"
+import prettier from "prettier"
+import git from "simple-git"
+import strip from "strip-comments"
+
+import { configQuestions } from "./configHandler"
+import loadIgnoreConfig, { IgnoreConfig } from "./loadIgnoreConfig"
+import { htmlToJson } from "./syntax"
+import { universalExcludedExtensions, universalExcludedNames } from "./universalExcludes"
 
 function getPrettierParser(extension: string): string | null {
   const parserOptions: { [key: string]: string } = {
@@ -135,9 +133,8 @@ export async function main(
   let ignoreConfig: IgnoreConfig | null = null
 
   // Create a promise to track PDF completion
-  let pdfComplete: Promise<void>
   let resolvePdfComplete: () => void
-  pdfComplete = new Promise((resolve) => {
+  const pdfComplete: Promise<void> = new Promise((resolve) => {
     resolvePdfComplete = resolve
   })
 

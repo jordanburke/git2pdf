@@ -1,6 +1,7 @@
 // src/tests/universalExcludes.test.ts
-import { describe, it, expect } from "vitest"
-import { universalExcludedNames, universalExcludedExtensions } from "../universalExcludes"
+import { describe, expect, it } from "vitest"
+
+import { universalExcludedExtensions, universalExcludedNames } from "../universalExcludes"
 
 describe("universalExcludes", () => {
   describe("universalExcludedNames", () => {

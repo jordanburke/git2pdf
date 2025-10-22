@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { createCliParser, parseCliArgs } from "../cliParser"
 import fs from "fs"
 import path from "path"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import { createCliParser, parseCliArgs } from "../cliParser"
 
 // Set test environment
 process.env.NODE_ENV = "test"

@@ -1,5 +1,6 @@
 // src/tests/syntax.test.ts
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
+
 import { htmlToJson } from "../syntax"
 
 describe("syntax", () => {
