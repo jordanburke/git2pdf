@@ -40,14 +40,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Format files
-        run: pnpm run format
-
-      - name: Check formatting
-        run: pnpm run format:check
-
-      - name: Build
-        run: pnpm run build
+      - name: Validate (format + lint + test + build)
+        run: pnpm run validate
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v4
@@ -73,7 +67,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 10
           run_install: false
 
       - name: Get pnpm store directory
