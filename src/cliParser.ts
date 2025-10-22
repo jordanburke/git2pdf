@@ -27,6 +27,9 @@ export function createCliParser(): Command {
     .option("--split", "Generate one PDF per file")
     .option("--keep-repo", "Keep cloned repository after processing")
     .option("--non-interactive", "Run in non-interactive mode", false)
+    .option("--tab-width <number>", "Number of spaces per tab character", "2")
+    .option("--line-spacing <number>", "Vertical spacing between lines (2-10)", "4")
+    .option("--code-font <font>", "Font for code rendering", "Courier")
     .addHelpText(
       "after",
       `
@@ -41,6 +44,8 @@ $ git2pdf https://github.com/user/repo --split --dir ./output
 $ git2pdf https://github.com/user/repo -f src/components
 # Run in non-interactive mode
 $ git2pdf -l . --non-interactive
+# Custom formatting options
+$ git2pdf https://github.com/user/repo --tab-width 4 --line-spacing 6 --code-font Courier-Bold
 `,
     )
   return program
@@ -100,6 +105,26 @@ export function parseCliArgs(argv: string[]): Arguments | null {
   const outputFileName = options.output ? resolvePath(options.output) : resolvePath("output.pdf")
   const outputFolderName = options.dir ? resolvePath(options.dir) : resolvePath("./output")
 
+  // Parse and validate formatting options
+  const tabWidth = parseInt(options.tabWidth, 10)
+  const lineSpacing = parseInt(options.lineSpacing, 10)
+
+  if (isNaN(tabWidth) || tabWidth < 1 || tabWidth > 8) {
+    console.error("Error: --tab-width must be a number between 1 and 8")
+    if (isTest) {
+      throw new Error("--tab-width must be a number between 1 and 8")
+    }
+    process.exit(1)
+  }
+
+  if (isNaN(lineSpacing) || lineSpacing < 2 || lineSpacing > 10) {
+    console.error("Error: --line-spacing must be a number between 2 and 10")
+    if (isTest) {
+      throw new Error("--line-spacing must be a number between 2 and 10")
+    }
+    process.exit(1)
+  }
+
   const params: Arguments = {
     localRepo: options.local || false,
     localRepoPath: options.local ? finalRepoPath : undefined,
@@ -111,6 +136,11 @@ export function parseCliArgs(argv: string[]): Arguments | null {
       removeComments: options.removeComments || false,
       removeEmptyLines: options.removeEmpty || false,
       onePdfPerFile: options.split || false,
+    },
+    formatting: {
+      tabWidth,
+      lineSpacing,
+      codeFont: options.codeFont || "Courier",
     },
     outputFileName: isTest ? options.output || "output.pdf" : outputFileName,
     outputFolderName: isTest ? options.dir || "./output" : outputFolderName,

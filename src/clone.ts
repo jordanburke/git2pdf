@@ -121,6 +121,9 @@ export async function main(
   outputFileName: fs.PathLike,
   outputFolderName: string,
   keepRepo: boolean,
+  tabWidth: number = 2,
+  lineSpacing: number = 4,
+  codeFont: string = "Courier",
   useSpinner: boolean = true,
   specificFilePath?: string,
   nonInteractive: boolean = false,
@@ -191,6 +194,9 @@ export async function main(
           addLineNumbers,
           addHighlighting,
           removeEmptyLines,
+          tabWidth,
+          lineSpacing,
+          codeFont,
         )
       } else if (stat.isDirectory()) {
         await appendFilesToPdf(fullPath, removeComments)
@@ -245,6 +251,9 @@ export async function main(
     addLineNumbers: boolean,
     addHighlighting: boolean,
     removeEmptyLines: boolean,
+    tabWidth: number,
+    lineSpacing: number,
+    codeFont: string,
   ) {
     fileCount++
     spinner.text =
@@ -270,10 +279,10 @@ export async function main(
       // Add file header
       if (fileCount > 1) doc.addPage()
       doc
-        .font("Courier")
+        .font(codeFont)
         .fontSize(10)
         .fillColor("#666666")
-        .text(`// File: ${fileName}`, { lineGap: 4 })
+        .text(`// File: ${fileName}`, { lineGap: lineSpacing })
         .fillColor("black")
 
       if (isBinaryFileSync(filePath)) {
@@ -294,7 +303,8 @@ export async function main(
           }
         }
 
-        data = data.replace(/\t/g, " ")
+        // Convert tabs to configured number of spaces and normalize line endings
+        data = data.replace(/\t/g, " ".repeat(tabWidth))
         data = data.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
 
         if (removeComments) {
@@ -377,6 +387,9 @@ export async function main(
           addLineNumbers,
           addHighlighting,
           removeEmptyLines,
+          tabWidth,
+          lineSpacing,
+          codeFont,
         )
         fileCount++
       } else if (stat.isDirectory()) {

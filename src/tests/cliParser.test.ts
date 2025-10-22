@@ -113,6 +113,11 @@ describe("CLI Parser", () => {
           removeEmptyLines: false,
           onePdfPerFile: false,
         },
+        formatting: {
+          tabWidth: 2,
+          lineSpacing: 4,
+          codeFont: "Courier",
+        },
         outputFileName: "test.pdf",
         outputFolderName: "./output",
         keepRepo: false,
@@ -149,12 +154,66 @@ describe("CLI Parser", () => {
           removeEmptyLines: false,
           onePdfPerFile: false,
         },
+        formatting: {
+          tabWidth: 2,
+          lineSpacing: 4,
+          codeFont: "Courier",
+        },
         outputFileName: "output.pdf",
         outputFolderName: "./output",
         keepRepo: false,
         filePath: "src/components",
         nonInteractive: false,
       })
+    })
+
+    it("should parse custom formatting options", () => {
+      const repoUrl = "https://github.com/user/repo"
+      fs.existsSync = vi.fn().mockReturnValue(true)
+
+      const result = parseCliArgs([
+        "node",
+        "git2pdf",
+        repoUrl,
+        "--tab-width",
+        "4",
+        "--line-spacing",
+        "6",
+        "--code-font",
+        "Courier-Bold",
+      ])
+
+      expect(result?.formatting).toEqual({
+        tabWidth: 4,
+        lineSpacing: 6,
+        codeFont: "Courier-Bold",
+      })
+    })
+
+    it("should validate tab-width is within range", () => {
+      const repoUrl = "https://github.com/user/repo"
+      fs.existsSync = vi.fn().mockReturnValue(true)
+
+      expect(() => {
+        parseCliArgs(["node", "git2pdf", repoUrl, "--tab-width", "0"])
+      }).toThrow("--tab-width must be a number between 1 and 8")
+
+      expect(() => {
+        parseCliArgs(["node", "git2pdf", repoUrl, "--tab-width", "9"])
+      }).toThrow("--tab-width must be a number between 1 and 8")
+    })
+
+    it("should validate line-spacing is within range", () => {
+      const repoUrl = "https://github.com/user/repo"
+      fs.existsSync = vi.fn().mockReturnValue(true)
+
+      expect(() => {
+        parseCliArgs(["node", "git2pdf", repoUrl, "--line-spacing", "1"])
+      }).toThrow("--line-spacing must be a number between 2 and 10")
+
+      expect(() => {
+        parseCliArgs(["node", "git2pdf", repoUrl, "--line-spacing", "11"])
+      }).toThrow("--line-spacing must be a number between 2 and 10")
     })
   })
 })

@@ -26,6 +26,9 @@ async function start(): Promise<void> {
         args.outputFileName,
         args.outputFolderName,
         args.keepRepo,
+        args.formatting.tabWidth,
+        args.formatting.lineSpacing,
+        args.formatting.codeFont,
         false, // useSpinner in non-interactive mode
         args.filePath,
         true, // nonInteractive
@@ -51,6 +54,9 @@ async function start(): Promise<void> {
         args.outputFileName,
         args.outputFolderName,
         args.keepRepo,
+        args.formatting.tabWidth,
+        args.formatting.lineSpacing,
+        args.formatting.codeFont,
         true, // useSpinner in interactive mode
         args.filePath,
         false, // nonInteractive

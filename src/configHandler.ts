@@ -144,6 +144,9 @@ export async function configQuestions(main: Function, chalk: typeof chalkType, i
     outputFileName,
     outputFolderName,
     keepRepo,
+    2, // tabWidth - default
+    4, // lineSpacing - default
+    "Courier", // codeFont - default
     true, // useSpinner
     filePath, // Pass the specific file path
   )

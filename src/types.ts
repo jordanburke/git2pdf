@@ -8,11 +8,18 @@ export interface Features {
   onePdfPerFile: boolean
 }
 
+export interface FormattingOptions {
+  tabWidth: number
+  lineSpacing: number
+  codeFont: string
+}
+
 export interface Arguments {
   localRepo: boolean
   localRepoPath?: string
   repoUrl?: string
   features: Features
+  formatting: FormattingOptions
   outputFileName: string
   outputFolderName: string
   keepRepo: boolean
